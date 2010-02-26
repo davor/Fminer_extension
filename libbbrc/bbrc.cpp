@@ -25,7 +25,7 @@
 
 // 1. Constructors and Initializers
 
-Bbrc::Fminer() : init_mining_done(false) {
+Bbrc::Bbrc() : init_mining_done(false) {
   if (!fm::instance_present) {
       fm::database = NULL; fm::statistics = NULL; fm::chisq = NULL; fm::result = NULL;
       Reset();
@@ -41,7 +41,7 @@ Bbrc::Fminer() : init_mining_done(false) {
   }
 }
 
-Bbrc::Fminer(int _type, unsigned int _minfreq) : init_mining_done(false) {
+Bbrc::Bbrc(int _type, unsigned int _minfreq) : init_mining_done(false) {
   if (!fm::instance_present) {
       fm::database = NULL; fm::statistics = NULL; fm::chisq = NULL; fm::result = NULL;
       Reset();
@@ -60,7 +60,7 @@ Bbrc::Fminer(int _type, unsigned int _minfreq) : init_mining_done(false) {
 
 }
 
-Bbrc::Fminer(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone) : init_mining_done(false) {
+Bbrc::Bbrc(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone) : init_mining_done(false) {
   if (!fm::instance_present) {
       fm::database = NULL; fm::statistics = NULL; fm::chisq = NULL; fm::result = NULL;
       Reset();
@@ -82,7 +82,7 @@ Bbrc::Fminer(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbo
 
 }
 
-Bbrc::~Fminer() {
+Bbrc::~Bbrc() {
     if (fm::instance_present) {
         delete fm::database;
         delete fm::statistics; 
@@ -337,7 +337,7 @@ vector<string>* Bbrc::MineRoot(unsigned int j) {
              << "Most specific BBRC members: " << GetMostSpecTreesOnly() << endl \
              << "---" << endl;
     }
-    if (j >= fm::database->nodelabels.size()) { cerr << "Error! Root node does not exist." << endl;  exit(1); }
+    if (j >= fm::database->nodelabels.size()) { cerr << "Error! Root node " << j << " does not exist." << endl;  exit(1); }
     if ( fm::database->nodelabels[j].frequency >= fm::minfreq && fm::database->nodelabels[j].frequentedgelabels.size () ) {
         Path path(j);
         path.expand(); // mining step
@@ -392,3 +392,19 @@ bool Bbrc::AddActivity(float act, unsigned int comp_id) {
         return true;
     }
 }
+
+
+// the class factories
+extern "C" Fminer* create0() {
+    return new Bbrc();
+}
+extern "C" Fminer* create2(int _type, unsigned int _minfreq) {
+    return new Bbrc(_type, _minfreq);
+}
+extern "C" Fminer* create4(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone) {
+    return new Bbrc(_type, _minfreq, _chisq_val, _do_backbone);
+}
+extern "C" void destroy(Fminer* f) {
+    delete f;
+}
+

@@ -21,69 +21,65 @@
 #ifndef FMINER_H
 #define FMINER_H
 
+#include <vector>
+#include <string>
+#include <vector>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <errno.h>
+#include <stdio.h>
+#include <iomanip>
+#include <algorithm>
+
+#define each(_vector) for (int i = 0 ; i < (int) ( _vector ).size() ; i++ )
+
+typedef unsigned char EdgeLabel; // combined node-edge label of the input file.
+typedef unsigned char NodeLabel;
+typedef unsigned short NodeId;
+typedef unsigned int Depth; // unsigned int is more efficient than short, but requires more memory...
+typedef unsigned int Tid;
+typedef unsigned int Frequency;
+
 class Fminer {
 
 public:
 
-    Fminer () 
-    Fminer (int _type, unsigned int _minfreq)
-    Fminer (int _type, unsigned int _minfreq, float chisq_val, bool _do_backbone)
+    Fminer () {}
+    Fminer (int _type, unsigned int _minfreq) {}
+    Fminer (int _type, unsigned int _minfreq, float chisq_val, bool _do_backbone) {}
     virtual ~Fminer() {}
-//    virtual void Reset() {}
-//    virtual void Defaults() {}
-//    virtual int GetMinfreq() {}
-//    virtual int GetType() {}
-    virtual bool GetBackbone() {}
-//    virtual bool GetDynamicUpperBound() {}
-//    virtual bool GetDynamicUpperBound() {}
-//    virtual bool GetPruning() {}
-    virtual bool GetConsoleOut() {}
-//    virtual bool GetAromatic() {}
-//    virtual bool GetRefineSingles() {}
-//    virtual bool GetDoOutput() {}
-//    virtual bool GetBbrcSep() {}
-//    virtual bool GetMostSpecTreesOnly() {}
-//    virtual bool GetChisqActive() {}
-//    virtual float GetChisqSig() {}
-//    virtual bool GetLineNrs() {}
-    virtual bool GetRegression() {}
-//    virtual void SetMinfreq(int val) {}
-//    virtual void SetType(int val) {}
-//    virtual void SetBackbone(bool val) {}
-    virtual void SetDynamicUpperBound(bool val) {}
-    virtual void SetPruning(bool val) {}
-    virtual void SetConsoleOut(bool val) {}
-    virtual void SetAromatic(bool val) {}
-    virtual void SetRefineSingles(bool val) {}
-//    virtual void SetDoOutput(bool val) {}  
-    virtual void SetBbrcSep(bool val) {}
-    virtual void SetMostSpecTreesOnly(bool val) {}
-    virtual void SetChisqActive(bool val) {}
-//    virtual void SetChisqSig(float _chisq_val) {}
-    virtual void SetLineNrs(bool val) {}
-    virtual void SetRegression(bool val) {}
-    virtual vector<string>* MineRoot(unsigned int j) {}
 
-    virtual void ReadGsp(FILE* gsp) {}
-    virtual bool AddCompound(string smiles, unsigned int comp_id) {}
-    virtual bool AddActivity(float act, unsigned int comp_id) {}
-    virtual int GetNoRootNodes() {return fm::database->nodelabels.size();}
-    virtual int GetNoCompounds() {return fm::database->trees.size();}
+    virtual bool GetBackbone() = 0;
+    virtual bool GetConsoleOut() = 0;
+    virtual bool GetRegression() = 0;
+    virtual void SetDynamicUpperBound(bool val) = 0;
+    virtual void SetPruning(bool val) = 0;
+    virtual void SetConsoleOut(bool val) = 0;
+    virtual void SetAromatic(bool val) = 0;
+    virtual void SetRefineSingles(bool val) = 0;
+    virtual void SetDoOutput(bool val) = 0;
+    virtual void SetBbrcSep(bool val) = 0;
+    virtual void SetMostSpecTreesOnly(bool val) = 0;
+    virtual void SetChisqActive(bool val) = 0;
+    virtual void SetLineNrs(bool val) = 0;
+    virtual void SetRegression(bool val) = 0;
+    virtual std::vector<std::string>* MineRoot(unsigned int j) = 0;
+    virtual void ReadGsp(FILE* gsp) = 0;
+    virtual bool AddCompound(std::string smiles, unsigned int comp_id) = 0;
+    virtual bool AddActivity(float act, unsigned int comp_id) = 0;
 
-/*private:
+    virtual int GetNoRootNodes() = 0;
+    virtual int GetNoCompounds() = 0;
 
-    virtual void AddChiSqNa(){fm::chisq->na++;fm::chisq->n++;}
-    virtual void AddChiSqNi(){fm::chisq->ni++;fm::chisq->n++;}
-    virtual void AddKS(float val){fm::ks->all.push_back(val);}
-    virtual bool init_mining_done {}
-    virtual int comp_runner {}
-    virtual int comp_no {}
-    virtual vector<string> r {}
-*/
 };
 
 // the types of the class factories
-typedef Fminer* create_t();
+typedef Fminer* create0_t();
+typedef Fminer* create2_t(int _type, unsigned int _minfreq);
+typedef Fminer* create4_t(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone);
 typedef void destroy_t(Fminer*);
 
 #endif

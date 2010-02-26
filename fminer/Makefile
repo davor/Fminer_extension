@@ -17,28 +17,27 @@
 # along with Fminer.  If not, see <http://www.gnu.org/licenses/>.
 
 # PATH TO LIBFMINER SOURCE DIRECTORY:
-LIBDIR        = /home/davor/work/amaunz/libbbrc
 
-INCLUDE_OB  =  -I/usr/local/include/openbabel-2.0  
+INCLUDE_OB  =  -I/usr/include/openbabel-2.0  
 INCLUDE_GSL  =   
-LDFLAGS_OB  =  -L/usr/local/lib  
+LDFLAGS_OB  =   
 LDFLAGS_GSL  =   
-INCLUDE_RB  =  1.9.1p243 NOT FOUND
+INCLUDE_RB  = -I/usr/lib/ruby/1.8/i486-linux
 
 # EXAMPLES:
 # ADJUST COMPILER PATH TO OPENBABEL INCLUDE FILES (1st line Linux, 2nd line Windows):
 #INCLUDE_OB    = -I/usr/local/include/openbabel-2.0
-INCLUDE_OB   += -I/home/openbabel-2.2.1/include
+INCLUDE_OB  =  -I/usr/include/openbabel-2.0  
 # ADJUST COMPILER PATH TO GSL INCLUDE FILES (1st line Linux, 2nd line Windows):
 #INCLUDE_GSL   = -I/usr/include
-INCLUDE_GSL  += -I/c/Program\ Files/GnuWin32/include/
+INCLUDE_GSL  =   
 
 # ADJUST LINKER PATH TO OPENBABEL LIBRARY FILES (1st line Linux, 2nd line Windows):
 #LDFLAGS_OB    = -L/usr/local/lib
-LDFLAGS_OB   += -L/c/Users/am/fminer
+LDFLAGS_OB  =   
 # ADJUST LINKER PATH TO GSL LIBRARY FILES (1st line Linux, 2nd line Windows):
 #LDFLAGS_GSL   =
-LDFLAGS_GSL  += -L/c/Program\ Files/GnuWin32/bin/
+LDFLAGS_GSL  =   
 
 
 
@@ -51,13 +50,13 @@ DESTDIR       = /usr/local/bin
 PROGRAM = fminer
 # OPTIONS
 CC            = g++
-INCLUDE       = -I$(LIBDIR) $(INCLUDE_OB) $(INCLUDE_GSL)
-LDFLAGS       = -L$(LIBDIR) $(LDFLAGS_OB) $(LDFLAGS_GSL)
+INCLUDE       = $(INCLUDE_OB) $(INCLUDE_GSL)
+LDFLAGS       = $(LDFLAGS_OB) $(LDFLAGS_GSL)
 CXXFLAGS      = -Wall -O3 -g
 ifeq ($(OS), Windows_NT) # assume MinGW/Windows
-LIBS	      = -lm -llibopenbabel-3 -llibgsl -llibgslcblas -llibfminer
+LIBS	      = -lm -llibopenbabel-3 -llibgsl -llibgslcblas 
 else
-LIBS	      = -lopenbabel -lfminer -lgsl -lgslcblas
+LIBS	      = -lopenbabel -lgsl -lgslcblas
 endif
 
 # TARGETS

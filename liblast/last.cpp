@@ -25,7 +25,7 @@
 
 // 1. Constructors and Initializers
 
-Last::Fminer() : init_mining_done(false) {
+Last::Last() : init_mining_done(false) {
   if (!fm::instance_present) {
       fm::database = NULL; fm::statistics = NULL; fm::chisq = NULL; fm::result = NULL;
       Reset();
@@ -39,7 +39,7 @@ Last::Fminer() : init_mining_done(false) {
   }
 }
 
-Last::Fminer(int _type, unsigned int _minfreq) : init_mining_done(false) {
+Last::Last(int _type, unsigned int _minfreq) : init_mining_done(false) {
   if (!fm::instance_present) {
       fm::database = NULL; fm::statistics = NULL; fm::chisq = NULL; fm::result = NULL;
       Reset();
@@ -56,7 +56,7 @@ Last::Fminer(int _type, unsigned int _minfreq) : init_mining_done(false) {
 
 }
 
-Last::Fminer(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone) : init_mining_done(false) {
+Last::Last(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone) : init_mining_done(false) {
   if (!fm::instance_present) {
       fm::database = NULL; fm::statistics = NULL; fm::chisq = NULL; fm::result = NULL;
       Reset();
@@ -75,7 +75,7 @@ Last::Fminer(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbo
 
 }
 
-Last::~Fminer() {
+Last::~Last() {
     if (fm::instance_present) {
         delete fm::database;
         delete fm::statistics; 
@@ -297,7 +297,7 @@ vector<string>* Last::MineRoot(unsigned int j) {
 
 
     }
-    if (j >= fm::database->nodelabels.size()) { cerr << "Error! Root node does not exist." << endl;  exit(1); }
+    if (j >= fm::database->nodelabels.size()) { cerr << "Error! Root node " << j << " does not exist." << endl;  exit(1); }
     if ( fm::database->nodelabels[j].frequency >= fm::minfreq && fm::database->nodelabels[j].frequentedgelabels.size () ) {
         Path path(j);
         path.expand(); // mining step
@@ -353,3 +353,18 @@ bool Last::AddActivity(float act, unsigned int comp_id) {
         return true;
     }
 }
+
+// the class factories
+extern "C" Fminer* create() {
+    return new Last();
+}
+extern "C" Fminer* create2(int _type, unsigned int _minfreq) {
+    return new Last(_type, _minfreq);
+}
+extern "C" Fminer* create4(int _type, unsigned int _minfreq, float _chisq_val, bool _do_backbone) {
+    return new Last(_type, _minfreq, _chisq_val, _do_backbone);
+}
+extern "C" void destroy(Fminer* l) {
+    delete l;
+}
+

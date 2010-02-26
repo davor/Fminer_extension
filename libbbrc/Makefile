@@ -46,7 +46,7 @@ DESTDIR       = /usr/local/lib/
 
 # NORMALLY NO ADJUSTMENT NECESSARY BELOW THIS LINE. Exit and try 'make' now.
 # WHAT
-NAME          = fminer
+NAME          = bbrc
 # OPTIONS
 CC            = g++
 INCLUDE       = $(INCLUDE_OB) $(INCLUDE_GSL) 

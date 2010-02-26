@@ -27,39 +27,13 @@
 #include "fminer.h"
 
 using namespace std;
-using namespace OpenBabel;
 
+class Statistics;
 extern Statistics* statistics;
 
-//Fminer* fminer;
-
-    // load the Bbrc library
-    void* Bbrc = dlopen("./../libbbrc/bbrc.so", RTLD_LAZY);
-    if (!Bbrc) {
-        cerr << "Cannot load library: " << dlerror() << '\n';
-        return 1;
-    }
-
-    // reset errors
-    dlerror();
-    
-    // load the symbols
-    create_t* create_bbrc = (create_t*) dlsym(Bbrc, "create");
-    const char* dlsym_error = dlerror();
-    if (dlsym_error) {
-        cerr << "Cannot load symbol create: " << dlsym_error << '\n';
-        return 1;
-    }
-    
-    destroy_t* destroy_bbrc = (destroy_t*) dlsym(Bbrc, "destroy");
-    dlsym_error = dlerror();
-    if (dlsym_error) {
-        cerr << "Cannot load symbol destroy: " << dlsym_error << '\n';
-        return 1;
-    }    
-    // create an instance of the class
-    Fminer* fminer = create_bbrc();
-
+Fminer* fminer;
+destroy_t* destroy_lib;
+void* Lib;
 
 
 // helper routines
@@ -251,6 +225,7 @@ int main(int argc, char *argv[], char *envp[]) {
     int status=1;
     char* graph_file = NULL;
     char* act_file = NULL;
+    char* lib_path = NULL;
 
     bool do_output = true;
     bool refine_singles = false;
@@ -263,40 +238,43 @@ int main(int argc, char *argv[], char *envp[]) {
     bool most_specific_trees_only = false;
     bool do_regression = false;
     
-
     // FILE ARGUMENT READ
-    if (argc>2) {
-       if (argv[argc-2][0]!='-') {
-           graph_file = argv[argc-2]; status=0;
-           if (argv[argc-1][0]=='-') {
-               status=1;
-           }
-           else {
-               act_file = argv[argc-1]; //chisq.active=1;
-           }
-       }
-       else {
-           if (argv[argc-1][0]=='-') {
-               status=1;
-           }
-           else {
-              graph_file = argv[argc-1]; //chisq.active=0;
-              status = 0;
-           }
-       }
-    }
-    else if (argc==2){
-       if (argv[argc-1][0]=='-') {
-           status=1;
-       }
-       else {
-           graph_file = argv[argc-1]; //chisq.active=0;
-           status = 0;
-       }
-    }
-    else status=1;
+	if (argv[1][0]!='-') {
+		lib_path = argv[1]; //set lib path
+		if (argc>3) {
+	       if (argv[argc-2][0]!='-') {
+	           graph_file = argv[argc-2]; status=0;
+	           if (argv[argc-1][0]=='-') {
+	               status=1;
+	           }
+	           else {
+	               act_file = argv[argc-1]; //chisq.active=1;
+	           }
+	       }
+	       else {
+	           if (argv[argc-1][0]=='-') {
+	               status=1;
+	           }
+	           else {
+	              graph_file = argv[argc-1]; //chisq.active=0;
+	              status = 0;
+	           }
+	       }
+	    }
+	    else if (argc==3){
+	       if (argv[argc-1][0]=='-') {
+	           status=1;
+	       }
+	       else {
+	           graph_file = argv[argc-1]; //chisq.active=0;
+	           status = 0;
+	       }
+	    }
+	    else status=1;
+	}
+	else status=1;
 
-    
+
     // OPTIONS ARGUMENT READ
     char c;
     const char* const short_options = "f:l:p:saubmdonrgh";
@@ -390,8 +368,8 @@ int main(int argc, char *argv[], char *envp[]) {
     }
 
     if (status > 0) {
-        cerr << "Usage: " << program_name << " [-f minfreq] [-l type] [-s] [-a] [-o] [-n] [-r] [-d [-b [-m] | -u]] [-p p_value] <graphs> <activities>" << endl;
-        cerr << "       " << program_name << " [-f minfreq] [-l type] [-s] [-a] [-o] [-n] [-r] <graphs>" << endl;
+        cerr << "Usage: " << program_name << "<library> [-f minfreq] [-l type] [-s] [-a] [-o] [-n] [-r] [-d [-b [-m] | -u]] [-p p_value] <graphs> <activities>" << endl;
+        cerr << "       " << program_name << "<library> [-f minfreq] [-l type] [-s] [-a] [-o] [-n] [-r] <graphs>" << endl;
         cerr << endl;
     }
     if (status==1) {
@@ -400,6 +378,7 @@ int main(int argc, char *argv[], char *envp[]) {
     }
     if (status > 1) {
         cerr << "  File formats:" << endl;
+        cerr << "       <library> Select a library (e.g. LAST or BBRC). File must either have suffix .so or .dll." << endl;
         cerr << "       <graphs> File must either have suffix .smi or .gsp, indicating SMILES or gSpan format." << endl;
         cerr << "       <activities> File must be in Activity format (suffix not relevant)." << endl;
         cerr << endl;
@@ -424,19 +403,69 @@ int main(int argc, char *argv[], char *envp[]) {
         return 1;
     }  
 
+   // Check which library
+   
+	
    // DEFAULT SETTINGS FOR THIS HOST APP
    if (graph_file && act_file) {
-        fminer = new Fminer(type, minfreq, chisq_sig, do_backbone);
+
+        Lib = dlopen(lib_path, RTLD_LAZY);
+        if (!Lib) {
+            cerr << "Cannot load library: " << dlerror() << '\n';
+            return 1;
+        }
+        dlerror();
+        create4_t* create_lib = (create4_t*) dlsym(Lib, "create4");
+        const char* dlsym_error = dlerror();
+        if (dlsym_error) {
+            cerr << "Cannot load symbol create: " << dlsym_error << '\n';
+            return 1;
+        }
+        destroy_lib = (destroy_t*) dlsym(Lib, "destroy");
+        dlsym_error = dlerror();
+        if (dlsym_error) {
+            cerr << "Cannot load symbol destroy: " << dlsym_error << '\n';
+            return 1;
+        }    
+        fminer = create_lib(type, minfreq, chisq_sig, do_backbone);
+
+        //fminer = new Fminer(type, minfreq, chisq_sig, do_backbone);
         fminer->SetDynamicUpperBound(adjust_ub);
         fminer->SetPruning(do_pruning);
+
     }
+
     else if (graph_file) {
-        fminer = new Fminer(type, minfreq);
+
+        Lib = dlopen(lib_path, RTLD_LAZY);
+        if (!Lib) {
+            cerr << "Cannot load library: " << dlerror() << '\n';
+            return 1;
+        }
+        dlerror();
+        create2_t* create_lib = (create2_t*) dlsym(Lib, "create2");
+        const char* dlsym_error = dlerror();
+        if (dlsym_error) {
+            cerr << "Cannot load symbol create: " << dlsym_error << '\n';
+            return 1;
+        }
+        destroy_lib = (destroy_t*) dlsym(Lib, "destroy");
+        dlsym_error = dlerror();
+        if (dlsym_error) {
+            cerr << "Cannot load symbol destroy: " << dlsym_error << '\n';
+            return 1;
+        }    
+        fminer = create_lib(type, minfreq);
+
+        //fminer = new Fminer(type, minfreq);
         fminer->SetChisqActive(false);
+
     }
+
     else {
         exit(1);
     }
+
     fminer->SetAromatic(aromatic);
     fminer->SetRefineSingles(refine_singles);
     fminer->SetConsoleOut(true);
@@ -450,6 +479,7 @@ int main(int argc, char *argv[], char *envp[]) {
     //////////
     // READ //
     //////////
+
 
     if (graph_file && act_file) {
         cerr << "Reading compounds..." << endl;
@@ -488,10 +518,10 @@ int main(int argc, char *argv[], char *envp[]) {
 
 
     // destroy the class
-    destroy_bbrc(fminer);
+    destroy_lib(fminer);
 
     // unload the Bbrc library
-    dlclose(Bbrc);
+    dlclose(Lib);
     //delete fminer;
 
 }

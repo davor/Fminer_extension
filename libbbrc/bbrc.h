@@ -41,6 +41,7 @@ namespace fm {
     extern bool regression;
 
 }
+
 class Bbrc : public Fminer {
 
   public:
@@ -49,11 +50,11 @@ class Bbrc : public Fminer {
      *  Initializer functions.
      */
     //@{
-    Fminer (); //!< Constructor for standard settings: 95% significance level, minimum frequency 2, type trees, dynamic upper bound, BBRC.
-    Fminer (int _type, unsigned int _minfreq); //!< Like standard constructor, but type and minimum frequency configurable.
-    Fminer (int _type, unsigned int _minfreq, float chisq_val, bool _do_backbone); //!< Like standard constructor, but type, minimum frequency, significance level and BBRC configurable.
+    Bbrc (); //!< Constructor for standard settings: 95% significance level, minimum frequency 2, type trees, dynamic upper bound, BBRC.
+    Bbrc (int _type, unsigned int _minfreq); //!< Like standard constructor, but type and minimum frequency configurable.
+    Bbrc (int _type, unsigned int _minfreq, float chisq_val, bool _do_backbone); //!< Like standard constructor, but type, minimum frequency, significance level and BBRC configurable.
 
-    ~Fminer();
+    ~Bbrc();
     void Reset(); //!< Use this to clear the database before feeding new compounds and activities.
     void Defaults(); //!< Use this to set default parameters as in default constructor.
     //@}
@@ -99,7 +100,6 @@ class Bbrc : public Fminer {
     void SetLineNrs(bool val); //!< Set 'true' here to enable line numbers in the output file.
     void SetRegression(bool val); //!< Set 'true' here to enable continuous activity values.
     //@}
- polygon   
     /** @name Others
      *  Other functions.
      */
@@ -127,14 +127,5 @@ class Bbrc : public Fminer {
     vector<string> r;
 
 };
-
-// the class factories
-extern "C" Fminer* create() {
-    return new Bbrc;
-}
-
-extern "C" void destroy(Fminer* f) {
-    delete f;
-}
 
 #endif
